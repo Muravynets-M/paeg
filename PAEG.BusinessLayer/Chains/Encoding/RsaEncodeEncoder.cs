@@ -24,9 +24,9 @@ public class RsaEncodeEncoder : IEncodingChain {
         var votingPublicKey = _votingCenterProvider.VotingCentre;
 
         using var rsa = RSACryptoServiceProvider.Create();
-        rsa.ImportParameters(userSecret.RsaParameters);
+        rsa.ImportParameters(votingPublicKey.RsaParameters);
 
-        var encryptedVote = rsa.Encrypt(userVote.EncryptedVote, RSAEncryptionPadding.OaepSHA512);
+        var encryptedVote = rsa.Encrypt(userVote.EncryptedVote, RSAEncryptionPadding.Pkcs1);
         _tableProvider.GetEncodingByIdBallot(userVote.IdBallot).EncryptedHash = encryptedVote;
         userVote.EncryptedVote = encryptedVote;
 

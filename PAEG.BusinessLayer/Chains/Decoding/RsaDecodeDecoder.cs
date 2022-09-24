@@ -19,7 +19,7 @@ public class RsaDecodeDecoder : IDecodingChain {
         using var rsa = RSACryptoServiceProvider.Create();
         
         rsa.ImportParameters(votingCentre.RsaParameters);
-        userVote.EncryptedVote = rsa.Decrypt(userVote.EncryptedVote, RSAEncryptionPadding.OaepSHA512);
+        userVote.EncryptedVote = rsa.Decrypt(userVote.EncryptedVote, RSAEncryptionPadding.Pkcs1);
 
         _tableProvider.GetDecodingByIdBallot(userVote.IdBallot).DecryptedHash = userVote.EncryptedVote;
 
