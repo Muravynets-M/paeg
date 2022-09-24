@@ -1,0 +1,52 @@
+@page "/decodingtable"
+@inject HttpClient Http
+
+<PageTitle>Decoding Table</PageTitle>
+<h1>Decoding Table</h1>
+
+@if (encodingTables == null)
+{
+    <p>
+        <em>Loading...</em>
+    </p>
+}
+else
+{
+    <table class="table">
+        <thead>
+        <tr>
+            <th width="5%">Idballot</th>
+            <th width="5%">Vote</th>
+            <th width="10%">Sign Verified</th>
+            <th width="30%">Decrypted Hash</th>
+            <th width="30%">Gamma</th>
+            <th width="10%">Vote</th>
+            <th width="10%">Exception</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var data in encodingTables)
+        {
+            <tr>
+                <td>@data.IdBallot</td>
+                <td>@data.Vote</td>
+                <td>@data.SignVerified</td>
+                <td>@data.DecryptedHash?.Aggregate("", (s, b) => s + b + " ")</td>
+                <td>@data.Gamma?.Aggregate("", (s, b) => s + b + " ")</td>
+                <td>@data.Vote</td>
+                <td>@data.Exception</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+
+@code {
+    private Model.DecodingTable[]? encodingTables;
+
+    protected override async Task OnInitializedAsync()
+    {
+        encodingTables = await Http.GetFromJsonAsync<Model.DecodingTable[]>(Http.BaseAddress + "/table/decoding");
+    }
+
+}

@@ -1,0 +1,40 @@
+@page "/vote"
+@using Microsoft.Extensions.Logging
+@using PAEG.Model.Model
+@inject ILogger<Vote> Logger
+@inject HttpClient Http
+<h3>Vote</h3>
+
+<form class="w-25">
+    <EditForm Model="@_vote" OnValidSubmit="@HandleValidSubmit">
+        <DataAnnotationsValidator/>
+        <ValidationSummary/>
+
+        <div class="form-group">
+            <label for="idBallot">Id Ballot</label>
+            <InputNumber class="form-control" id="idBallot" @bind-Value="_vote.IdBallot"></InputNumber>
+        </div>
+        
+        <div class="form-group">
+            <label for="candidate">Candidate</label>
+           <InputNumber class="form-control" id="candidate" @bind-Value="_vote.Candidate"></InputNumber>
+        </div>
+
+        <br/>
+        <button class="btn btn-primary" type="submit">Submit</button>
+
+    </EditForm>
+</form>
+
+
+@code {
+    private VoteModel _vote = new();
+
+    private void HandleValidSubmit()
+    {
+        Logger.LogInformation(_vote.ToString());
+
+        Http.PostAsJsonAsync(Http.BaseAddress + "/voting", _vote);
+    }
+
+}

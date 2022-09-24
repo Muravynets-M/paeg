@@ -1,0 +1,49 @@
+@page "/userdata"
+@using PAEG.Model
+@inject HttpClient Http
+
+<PageTitle>User data</PageTitle>
+<h1>User Data</h1>
+
+@if (userPrivateData == null)
+{
+    <p>
+        <em>Loading...</em>
+    </p>
+}
+else
+{
+    <table class="table">
+        <thead>
+        <tr>
+            <th width="5%">Idballot</th>
+            <th width="5%">Email</th>
+            <th width="30%">Modulus</th>
+            <th width="30%">Exponent</th>
+            <th width="30%">D</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var data in userPrivateData)
+        {
+            <tr>
+                <td>@data.IdBallot</td>
+                <td>@data.Email</td>
+                <td>@data.Modulus.Aggregate("", (s, b) => s + b + " ")</td>
+                <td>@data.Exponent.Aggregate("", (s, b) => s + b + " ")</td>
+                <td>@data.D.Aggregate("", (s, b) => s + b + " ")</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+
+@code {
+    private UserPrivateData[]? userPrivateData;
+
+    protected override async Task OnInitializedAsync()
+    {
+        userPrivateData = await Http.GetFromJsonAsync<UserPrivateData[]>(Http.BaseAddress + "/user-data/get-all?private=true");
+    }
+
+}
