@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
+using PAEG.BusinessLayer.Exceptions;
 using PAEG.BusinessLayer.Services.Calculation;
 using PAEG.BusinessLayer.Services.Voting;
 using PAEG.Model;
@@ -23,9 +24,18 @@ public class VotingController {
     }
 
     [HttpPost]
-    public void Vote(VoteModel voteModel)
+    public IActionResult Vote(VoteModel voteModel)
     {
-        _votingService.Vote(voteModel.IdBallot, voteModel.Candidate);
+        try
+        {
+            _votingService.Vote(voteModel.Email ?? "", voteModel.IdBallot ?? 0, voteModel.Candidate ?? 0);
+
+            return new OkResult();
+        }
+        catch (BusinessException exception)
+        {
+            return new NotFoundResult();
+        }
     }
 
     [HttpPost("close")]

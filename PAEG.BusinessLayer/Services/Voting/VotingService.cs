@@ -1,5 +1,6 @@
 
 using PAEG.BusinessLayer.Chains.Encoding;
+using PAEG.BusinessLayer.Exceptions;
 using PAEG.Model;
 using PAEG.PersistenceLayer.DataProvider.Abstract;
 
@@ -20,12 +21,12 @@ public class VotingService : IVotingService
         _userDataProvider = userDataProvider;
     }
 
-    public void Vote(int idBallot, int candidate)
+    public void Vote(string userEmail, int idBallot, int candidate)
     {
         var vote = BitConverter.GetBytes(idBallot + candidate);
         _tableProvider.GetEncodingByIdBallot(idBallot).Vote = idBallot + candidate;
 
         _encodingChain.Encode(new UserVote(idBallot) {EncryptedVote = vote},
-            _userDataProvider.GetPrivateUserDataByIdBallot(idBallot));
+            _userDataProvider.GetPrivateUserDataByEmail(userEmail) ?? throw new UserNotFoundException());
     }
 }

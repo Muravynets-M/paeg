@@ -11,13 +11,22 @@
         <ValidationSummary/>
 
         <div class="form-group">
+            <label for="email">Email</label>
+            <InputText class="form-control" id="email" @bind-Value="_vote.Email"></InputText>
+            @if (Error != null)
+            {
+                <div class="form-text alert-warning">@Error</div>
+            }
+        </div>
+
+        <div class="form-group">
             <label for="idBallot">Id Ballot</label>
             <InputNumber class="form-control" id="idBallot" @bind-Value="_vote.IdBallot"></InputNumber>
         </div>
-        
+
         <div class="form-group">
             <label for="candidate">Candidate</label>
-           <InputNumber class="form-control" id="candidate" @bind-Value="_vote.Candidate"></InputNumber>
+            <InputNumber class="form-control" id="candidate" @bind-Value="_vote.Candidate"></InputNumber>
         </div>
 
         <br/>
@@ -30,11 +39,20 @@
 @code {
     private VoteModel _vote = new();
 
-    private void HandleValidSubmit()
+    private string? Error;
+
+    private async void HandleValidSubmit()
     {
+        Error = null;
         Logger.LogInformation(_vote.ToString());
 
-        Http.PostAsJsonAsync(Http.BaseAddress + "/voting", _vote);
+        var result = await Http.PostAsJsonAsync(Http.BaseAddress + "/voting", _vote);
+        if (!result.IsSuccessStatusCode)
+        {
+            Error = "User with such email was not found";
+        }
+        
+        StateHasChanged();
     }
 
 }

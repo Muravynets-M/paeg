@@ -13,15 +13,15 @@ public class RsaDecodeDecoder : IDecodingChain {
         _next = next;
         _tableProvider = tableProvider;
     }
-    
+
     public void Decode(UserVote userVote, UserPrivateData userSecret, PrivateVotingCentre votingCentre)
     {
         using var rsa = RSACryptoServiceProvider.Create();
-        
+
         rsa.ImportParameters(votingCentre.RsaParameters);
         userVote.EncryptedVote = rsa.Decrypt(userVote.EncryptedVote, RSAEncryptionPadding.Pkcs1);
 
-        _tableProvider.GetDecodingByIdBallot(userVote.IdBallot).DecryptedHash = userVote.EncryptedVote;
+        _tableProvider.GetDecodingByIdBallot(userVote.IdBallot).DecryptedHash = userVote.EncryptedVote.Select(b => b).ToArray();
 
         _next?.Decode(userVote, userSecret, votingCentre);
     }

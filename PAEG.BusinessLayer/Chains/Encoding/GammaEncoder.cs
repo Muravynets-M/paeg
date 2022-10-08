@@ -19,13 +19,15 @@ public class GammaEncoder : IEncodingChain {
 
     public void Encode(UserVote userVote, UserPrivateData userSecret)
     {
-        var secret = userSecret.D;
+        var secret = BitConverter.GetBytes(Int32.MaxValue);
+        _tableProvider.GetEncodingByIdBallot(userVote.IdBallot).Bytes = userVote.EncryptedVote.Select(b => b).ToArray();
+        
         for (var i = 0; i < userVote.EncryptedVote.Length; i++)
         {
-            userVote.EncryptedVote[i] = (byte) (userVote.EncryptedVote[i] ^ secret[i]);
+            userVote.EncryptedVote[i] ^= secret[i];
         }
 
-        _tableProvider.GetEncodingByIdBallot(userVote.IdBallot).Gamma = userVote.EncryptedVote;
+        _tableProvider.GetEncodingByIdBallot(userVote.IdBallot).Gamma = userVote.EncryptedVote.Select(b => b).ToArray();
 
         _next?.Encode(userVote, userSecret);
     }

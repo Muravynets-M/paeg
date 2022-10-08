@@ -19,7 +19,7 @@ public class InMemoryUserDataProvider : IUserDataProvider
         for (var i = 1; i <= userAmount; i++)
         {
             using var rsa = RSA.Create();
-            Data.Add(new UserDataEntity(Faker.Internet.Email(), 10 * factoring + i, rsa.ExportParameters(true)));
+            Data.Add(new UserDataEntity(Faker.Internet.Email(), (int)Math.Pow(10,  factoring) * i, rsa.ExportParameters(true)));
         }
     }
 
@@ -43,18 +43,17 @@ public class InMemoryUserDataProvider : IUserDataProvider
             user.RsaParameters.Exponent!)
         ).ToList();
     }
-
-    public UserPrivateData GetPrivateUserDataByIdBallot(int idBallot)
+    public UserPrivateData? GetPrivateUserDataByEmail(string email)
     {
         return Data
-            .Where(userData => userData.IdBallot == idBallot)
+            .Where(userData => userData.Email == email)
             .Select(user => new UserPrivateData(
-                user.Email,
-                user.RsaParameters.Modulus!,
-                user.RsaParameters.Exponent!,
-                user.RsaParameters.D!,
-                user.IdBallot,
-                user.RsaParameters)
-            ).First();
+            user.Email,
+            user.RsaParameters.Modulus!,
+            user.RsaParameters.Exponent!,
+            user.RsaParameters.D!,
+            user.IdBallot,
+            user.RsaParameters)
+            ).FirstOrDefault();
     }
 }

@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using PAEG.BusinessLayer.Chains.Decoding;
 using PAEG.BusinessLayer.Chains.Encoding;
 using PAEG.BusinessLayer.Services.Calculation;
@@ -39,7 +40,8 @@ public static class DependencyInjection
                             x.GetService<IVotingCentreDataProvider>()!,
                             int.Parse(configuration["Candidates"])
                             ),
-                        x.GetService<ITableProvider>()!
+                        x.GetService<ITableProvider>()!,
+                        x.GetService<ILogger<GammaDecoder>>()!
                         ),
                     x.GetService<ITableProvider>()!
                     ),

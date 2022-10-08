@@ -6,5 +6,5 @@ public interface IUserDataProvider
 {
     IEnumerable<UserPrivateData> GetPrivateUserData();
     IEnumerable<UserData> GetPublicUserData();
-    UserPrivateData GetPrivateUserDataByIdBallot(int idBallot);
+    UserPrivateData? GetPrivateUserDataByEmail(string email);
 }

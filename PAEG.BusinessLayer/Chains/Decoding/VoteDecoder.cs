@@ -21,12 +21,12 @@ public class VoteDecoder: IDecodingChain {
         var vote = BitConverter.ToInt32(userVote.EncryptedVote).ToString();
         _tableProvider.GetDecodingByIdBallot(userVote.IdBallot).Vote = int.Parse(vote);
 
-        if ($"{vote[..2]}0" != userVote.IdBallot.ToString())
+        if ($"{vote[.._candidateCount.ToString().Length]}" != userVote.IdBallot.ToString()[.._candidateCount.ToString().Length])
         {
             throw new InvalidBallotIdException();
         }
         
-        if (charToInt(vote[2]) > _candidateCount || charToInt(vote[2]) < 1)
+        if (charToInt(vote[_candidateCount.ToString().Length]) > _candidateCount || charToInt(vote[_candidateCount.ToString().Length]) < 1)
         {
             throw new InvalidCandidateException();
         }
@@ -36,11 +36,10 @@ public class VoteDecoder: IDecodingChain {
             throw new BallotAlreadyUsedException();
         }
         
-        _votingCentreDataProvider.CountVote(new VoteResult(userVote.IdBallot, charToInt(vote[2])));
+        _votingCentreDataProvider.CountVote(new VoteResult(userVote.IdBallot, charToInt(vote[_candidateCount.ToString().Length])));
     }
     private static int charToInt(char c)
     {
-
         return c - '0';
     }
 }

@@ -23,8 +23,15 @@ public class CalculationService : ICalculationService {
 
     public void CalculateVotes()
     {
-        foreach (var user in _userDataProvider.GetPrivateUserData())
+        foreach (var encdoingTable in _tableProvider.GetAllEncodingTables())
         {
+            var decodingTable = _tableProvider.GetDecodingByIdBallot(encdoingTable.IdBallot);
+            var user = _userDataProvider.GetPrivateUserData().FirstOrDefault(u => u.IdBallot == encdoingTable.IdBallot);
+            if (user is null)
+            {
+                decodingTable.Exception = "InvalidIdBallot";
+                continue;
+            }
             foreach (var vote in _votingCentreDataProvider.GetVotesByIdBallotOrdered(user.IdBallot))
             {
                 try
@@ -33,7 +40,7 @@ public class CalculationService : ICalculationService {
                 }
                 catch (BusinessException exception)
                 {
-                    _tableProvider.GetDecodingByIdBallot(vote.IdBallot).Exception = exception.ToString();
+                    decodingTable.Exception = exception.ToString();
                 }
             }
         }

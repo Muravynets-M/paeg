@@ -32,7 +32,7 @@ else
                 <td>@data.Vote</td>
                 <td>@data.SignVerified</td>
                 <td>@data.DecryptedHash?.Aggregate("", (s, b) => s + b + " ")</td>
-                <td>@data.Gamma?.Aggregate("", (s, b) => s + b + " ")</td>
+                <td>@data.Bytes?.Aggregate("", (s, b) => s + b + " ")</td>
                 <td>@data.Vote</td>
                 <td>@data.Exception</td>
             </tr>

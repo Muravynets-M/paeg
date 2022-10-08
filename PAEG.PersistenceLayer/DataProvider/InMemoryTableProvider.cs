@@ -4,27 +4,27 @@ using PAEG.PersistenceLayer.Entity;
 
 namespace PAEG.PersistenceLayer.DataProvider;
 
-public class InMemoryTableProvider: ITableProvider
-{
-    private static List<EncodingTable> _encodingData = new ();
-    private static List<DecodingTable> _decodingData = new ();
+public class InMemoryTableProvider : ITableProvider {
+    private static List<(int, EncodingTable)> _encodingData = new();
+    private static List<(int, DecodingTable)> _decodingData = new();
 
     public List<EncodingTable> GetAllEncodingTables()
     {
-        return _encodingData;
+        return _encodingData.Select(t => t.Item2).ToList();
     }
     public List<DecodingTable> GetAllDecodingTables()
     {
-        return _decodingData;
+        return _decodingData.Select(t => t.Item2).ToList();
     }
 
     public EncodingTable GetEncodingByIdBallot(int idBallot)
     {
-        var table = _encodingData.FirstOrDefault(t => t.IdBallot == idBallot);
-        if (table is null)
+        var table = _encodingData
+            .LastOrDefault(t => t.Item1 == idBallot).Item2;
+        if (table == null || table.EncryptedHash != null)
         {
             table = new EncodingTable(idBallot);
-            _encodingData.Add(table);
+            _encodingData.Add((idBallot, table));
         }
 
         return table;
@@ -32,11 +32,12 @@ public class InMemoryTableProvider: ITableProvider
 
     public DecodingTable GetDecodingByIdBallot(int idBallot)
     {
-        var table = _decodingData.FirstOrDefault(t => t.IdBallot == idBallot);
-        if (table is null)
+        var table = _decodingData
+            .LastOrDefault(t => t.Item1 == idBallot).Item2;
+        if (table == null || table.Vote != 0)
         {
             table = new DecodingTable(idBallot);
-            _decodingData.Add(table);
+            _decodingData.Add((idBallot, table));
         }
 
         return table;

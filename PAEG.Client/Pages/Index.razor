@@ -17,7 +17,23 @@ Welcome to your new app.
 }
 else
 {
-    
+    <table class="table w-50">
+        <thead>
+        <tr>
+            <th width="50%">Idballot</th>
+            <th width="50%">Vote</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var data in _voteResults)
+        {
+            <tr>
+                <td>@data.IdBallot</td>
+                <td>@data.Candidate</td>
+            </tr>
+        }
+        </tbody>
+    </table>
 }
 
 @code

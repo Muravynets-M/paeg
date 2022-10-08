@@ -8,6 +8,7 @@ builder.Services.AddCors(options => {
         policy.WithOrigins("https://localhost:7289").AllowAnyMethod().AllowAnyOrigin().AllowAnyHeader();
     });
 });
+builder.Logging.AddConsole();
 // Add services to the container.
 
 builder.Services.AddControllers();
@@ -26,7 +27,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseCors(builder => builder.AllowAnyHeader().AllowCredentials().AllowAnyMethod());
+app.UseCors(builder => builder.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
 
 app.UseAuthorization();
 
