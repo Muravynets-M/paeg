@@ -6,6 +6,7 @@ using PAEG.BusinessLayer.Services.Voting;
 using PAEG.Model;
 using PAEG.Model.Model;
 using PAEG.PersistenceLayer.DataProvider.Abstract;
+using System.Security.Cryptography;
 
 namespace PAEG.Api.Controllers.v1.Voting;
 
@@ -14,27 +15,53 @@ namespace PAEG.Api.Controllers.v1.Voting;
 public class VotingController {
     private readonly IVotingService _votingService;
     private readonly ICalculationService _calculationService;
-    private readonly IVotingCentreDataProvider _votingCentreDataProvider;
+    private readonly ITableProvider _tableProvider;
+    private IVotingCentreDataProvider _votingCentre;
 
-    public VotingController(IVotingService votingService, ICalculationService calculationService, IVotingCentreDataProvider votingCentreDataProvider)
+    public VotingController(IVotingService votingService, ICalculationService calculationService, ITableProvider tableProvider, IVotingCentreDataProvider votingCentre)
     {
         _votingService = votingService;
         _calculationService = calculationService;
-        _votingCentreDataProvider = votingCentreDataProvider;
+        _tableProvider = tableProvider;
+        _votingCentre = votingCentre;
     }
 
-    [HttpPost]
-    public IActionResult Vote(VoteModel voteModel)
+    [HttpPost("send-for-sign")]
+    public ActionResult<List<SignedMaskedBallot>> SendForSign(SendForSignModel sendForSign)
     {
         try
         {
-            _votingService.Vote(voteModel.Email ?? "", voteModel.IdBallot ?? 0, voteModel.Candidate ?? 0);
+            return _votingService.SendToVotingCenter(sendForSign.Ballots!, (int) sendForSign.MaskKey!, sendForSign.Email);
+
+        }
+        catch (BusinessException exception)
+        {
+            _tableProvider.SaveEncodingTable(new EncodingTable() {Guid = exception.Id, Error = exception.ToString()});
+
+            return new BadRequestObjectResult(exception.ToString());
+        }
+    }
+
+    [HttpPost]
+    public IActionResult Vote(SignedEncodedBallot signedEncodedBallot)
+    {
+        try
+        {
+            using var rsa = RSACryptoServiceProvider.Create();
+            rsa.ImportParameters(_votingCentre.VotingCentre.RsaParameters);
+
+            _votingService.Vote(signedEncodedBallot with
+            {
+                EncryptedVote = rsa.Encrypt(signedEncodedBallot.EncryptedVote, RSAEncryptionPadding.Pkcs1)
+            });
 
             return new OkResult();
         }
         catch (BusinessException exception)
         {
-            return new NotFoundResult();
+            _tableProvider.SaveEncodingTable(new EncodingTable() {Guid = exception.Id, Error = exception.ToString()});
+
+            return new BadRequestObjectResult(exception.ToString());
         }
     }
 
@@ -47,6 +74,6 @@ public class VotingController {
     [HttpGet("results")]
     public IEnumerable<VoteResult> GetResults()
     {
-        return _votingCentreDataProvider.GetVoteResults();
+        return _calculationService.GetVoteResults();
     }
 }

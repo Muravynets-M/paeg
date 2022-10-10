@@ -2,17 +2,13 @@ namespace PAEG.Model;
 
 public class EncodingTable
 {
-    public EncodingTable(int idBallot)
-    {
-        IdBallot = idBallot;
-    }
+    public Guid Guid { get; set; }
 
-    public int IdBallot { get; }
+    public SignedMaskedBallot SignedMaskedBallot { get; set; }
     
-    public int Vote { get; set; }
+    public SignedEncodedBallot SignedEncodedBallot { get; set; }
     
-    public byte[]? Bytes { get; set; }
-    public byte[]? Gamma { get; set; }
-    public byte[]? SignedHash { get; set; }
-    public byte[]? EncryptedHash { get; set; }
+    public int DecodedVote { get; set; }
+    
+    public string? Error { get; set; }
 }

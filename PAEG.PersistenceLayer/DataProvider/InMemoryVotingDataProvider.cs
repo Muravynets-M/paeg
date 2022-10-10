@@ -7,10 +7,17 @@ namespace PAEG.PersistenceLayer.DataProvider;
 
 public class InMemoryVotingDataProvider : IVotingCentreDataProvider {
     private static PrivateVotingCentre _votingCentre = null!;
-    private static List<UserVoteEntity> _userVotes = new();
+    private static List<Guid> _processedBallots = new();
     private static List<VoteResult> _voteResults = new();
 
-    static InMemoryVotingDataProvider()
+
+    private class UserVote {
+        public string Email { get; set; }
+        public Guid? Id { get; set; }
+    }
+    private static List<UserVote> _userVotes = new ();
+
+    public InMemoryVotingDataProvider()
     {
         GenerateData();
     }
@@ -22,28 +29,37 @@ public class InMemoryVotingDataProvider : IVotingCentreDataProvider {
     }
 
     public PrivateVotingCentre VotingCentre => _votingCentre;
-
-    public void SaveVote(UserVote userVote)
+    public void SaveProcessedBallot(Guid guid)
     {
-        _userVotes.Add(new UserVoteEntity(userVote));
+        _processedBallots.Add(guid);
     }
-
-    public void CountVote(VoteResult voteResult)
+ 
+    public void SaveUserVoting(string email, Guid? id)
     {
-        _voteResults.Add(voteResult);
+        if (id == null)
+        {
+            _userVotes.Add(new UserVote()
+            {
+                Email = email
+            });
+        }
+        else
+        {
+            var xd = _userVotes.FirstOrDefault(v => v.Email == email);
+            xd.Id = id;
+        }
     }
-
-    public bool HasBallotBeenUsed(int idBallot)
+    public bool HasUserVoted(string email)
     {
-        return _voteResults.Exists(v => v.IdBallot == idBallot);
+        return _userVotes.Exists(v => v.Email == email && v.Id != null);
     }
-
-    public IEnumerable<UserVote> GetVotesByIdBallotOrdered(int idBallot)
+    public bool HasBallotBeenUsed(Guid guid)
     {
-        return _userVotes
-            .Where(v => v.UserVote.IdBallot == idBallot)
-            .OrderBy(v => v.DateTime)
-            .Select(v => v.UserVote);
+        return _processedBallots.Exists(g => g == guid);
+    }
+    public void SaveVoteResult(Guid guid, int candidate)
+    {
+        _voteResults.Add(new VoteResult(guid, candidate));
     }
     public IEnumerable<VoteResult> GetVoteResults()
     {

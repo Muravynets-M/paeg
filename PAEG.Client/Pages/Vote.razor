@@ -1,58 +1,169 @@
 @page "/vote"
 @using Microsoft.Extensions.Logging
+@using PAEG.Model
 @using PAEG.Model.Model
+@using System.ComponentModel.DataAnnotations
+@using System.Security.Cryptography
+@using System.Text.Json
+@using System.Text.Json.Serialization
 @inject ILogger<Vote> Logger
 @inject HttpClient Http
 <h3>Vote</h3>
 
-<form class="w-25">
-    <EditForm Model="@_vote" OnValidSubmit="@HandleValidSubmit">
-        <DataAnnotationsValidator/>
-        <ValidationSummary/>
+<div class="row">
+    <div class="col-3">
+        <form>
+            <EditForm Model="@_prepareForSign" OnValidSubmit="@HandleValidSubmit">
+                <DataAnnotationsValidator/>
+                <ValidationSummary/>
 
-        <div class="form-group">
-            <label for="email">Email</label>
-            <InputText class="form-control" id="email" @bind-Value="_vote.Email"></InputText>
-            @if (Error != null)
-            {
-                <div class="form-text alert-warning">@Error</div>
-            }
-        </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <InputText class="form-control" id="email" @bind-Value="_prepareForSign.Email"></InputText>
+                    @if (Error != null)
+                    {
+                        <div class="form-text alert-warning">@Error</div>
+                    }
+                </div>
 
-        <div class="form-group">
-            <label for="idBallot">Id Ballot</label>
-            <InputNumber class="form-control" id="idBallot" @bind-Value="_vote.IdBallot"></InputNumber>
-        </div>
+                <div class="form-group">
+                    <label for="idBallot">Mask</label>
+                    <InputNumber class="form-control" id="idBallot" @bind-Value="_prepareForSign.MaskKey"></InputNumber>
+                </div>
+                <br/>
+                <button class="btn btn-primary" type="submit">Submit</button>
 
-        <div class="form-group">
-            <label for="candidate">Candidate</label>
-            <InputNumber class="form-control" id="candidate" @bind-Value="_vote.Candidate"></InputNumber>
-        </div>
+            </EditForm>
+        </form>
+    </div>
+    <div class="col-3">
+        @if (_signedBallots != null)
+        {
+            <form>
+                <EditForm Model="@_candidateModel" OnValidSubmit="@HandleCandidateSubmit">
+                    <DataAnnotationsValidator/>
+                    <ValidationSummary/>
 
-        <br/>
-        <button class="btn btn-primary" type="submit">Submit</button>
 
-    </EditForm>
-</form>
+                    <label for="email">Chose candidate to vote for</label>
+                    <br/>
+                    <InputRadioGroup @bind-Value="_candidateModel.Candidate">
+                        @foreach (var ballot in _signedBallots)
+                        {
+                            <div class="form-group">
+                                <InputRadio Value="BitConverter.ToInt32(Mask(ballot.Secret, _mask))" id="@ballot.Id"/>
+                                @BitConverter.ToInt32(Mask(ballot.Secret, _mask))
+                                <br/>
+                            </div>
+                        }
+                    </InputRadioGroup>
+
+
+                    <button class="btn btn-primary" type="submit">Submit</button>
+
+                </EditForm>
+            </form>
+        }
+    </div>
+</div>
 
 
 @code {
-    private VoteModel _vote = new();
+    private Model.UserData[]? _userData;
+    private List<SignedMaskedBallot>? _signedBallots;
+    private int _mask = 0;
+
+
+    private class ChosenCandidateModel {
+        [Required]
+        public int? Candidate { get; set; }
+    }
+
+
+    private ChosenCandidateModel _candidateModel = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        _userData = await Http.GetFromJsonAsync<Model.UserData[]>(Http.BaseAddress + "/user-data/get-all?private=true");
+    }
+
+    private PrepareForSignModel _prepareForSign = new();
 
     private string? Error;
 
     private async void HandleValidSubmit()
     {
         Error = null;
-        Logger.LogInformation(_vote.ToString());
+        Logger.LogInformation(_prepareForSign.ToString());
 
-        var result = await Http.PostAsJsonAsync(Http.BaseAddress + "/voting", _vote);
-        if (!result.IsSuccessStatusCode)
+        var user = _userData.FirstOrDefault(u => u.Email == _prepareForSign.Email);
+        if (user == null)
         {
             Error = "User with such email was not found";
+            StateHasChanged();
+            return;
         }
-        
+
+        var model = new SendForSignModel()
+        {
+            MaskKey = _prepareForSign.MaskKey,
+            Ballots = user.BallotPacks
+                .Select(pack =>
+                    pack.Select(p =>
+                        new MaskedBallot(
+                            Mask(p.Id.ToByteArray(), (int) _prepareForSign.MaskKey!),
+                            Mask(BitConverter.GetBytes(p.Candidate), (int) _prepareForSign.MaskKey!)
+                            )
+                        ).ToList()
+                ).ToList(),
+            Email = _prepareForSign.Email!,
+        };
+
+        var result = await Http.PostAsJsonAsync(Http.BaseAddress + "/voting/send-for-sign", model);
+
+        if (!result.IsSuccessStatusCode)
+        {
+            Error = await result.Content.ReadAsStringAsync();
+            StateHasChanged();
+            return;
+        }
+
+        var signedPack = await result.Content.ReadFromJsonAsync<List<SignedMaskedBallot>>();
+        Logger.LogInformation(JsonSerializer.Serialize(signedPack));
+        _signedBallots = signedPack;
+        _mask = (int) _prepareForSign.MaskKey!;
         StateHasChanged();
     }
 
+    private async void HandleCandidateSubmit()
+    {
+        Logger.LogInformation(_candidateModel.Candidate.ToString());
+
+        var encodedCandidate = BitConverter.GetBytes((int) _candidateModel.Candidate!);
+        var ballot = _signedBallots[(int) _candidateModel.Candidate - 1];
+
+        Mask(ballot.Id, _mask);
+        var signedEncoded = new SignedEncodedBallot(new Guid(Mask(ballot.Id, _mask)), ballot.Sign, encodedCandidate, _prepareForSign.Email!);
+        Logger.LogCritical(signedEncoded.Id.ToString());
+        var result = await Http.PostAsJsonAsync(Http.BaseAddress + "/voting", signedEncoded);
+
+        if (!result.IsSuccessStatusCode)
+        {
+            Error = await result.Content.ReadAsStringAsync();
+            StateHasChanged();
+        }
+    }
+
+    private static byte[] Mask(byte[] secret, int mask)
+    {
+        var bytes = new List<byte>();
+        var gamma = BitConverter.GetBytes(mask);
+        
+        for (var i = 0; i < secret.Length; i++)
+        {
+            bytes.Add((byte) (secret[i] ^ gamma[i % 4]));
+        }
+
+        return bytes.ToArray();
+    }
 }

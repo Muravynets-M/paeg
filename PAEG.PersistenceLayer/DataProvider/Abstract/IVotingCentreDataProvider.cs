@@ -6,13 +6,15 @@ public interface IVotingCentreDataProvider
 {
     public PrivateVotingCentre VotingCentre { get; }
 
-    public void SaveVote(UserVote userVote);
+    public void SaveProcessedBallot(Guid guid);
 
-    public void CountVote(VoteResult voteResult);
+    public void SaveUserVoting(string email, Guid? id = null);
 
-    public bool HasBallotBeenUsed(int idBallot);
+    public bool HasUserVoted(string email);
 
-    public IEnumerable<UserVote> GetVotesByIdBallotOrdered(int idBallot);
+    public bool HasBallotBeenUsed(Guid guid);
+
+    public void SaveVoteResult(Guid guid, int candidate);
 
     public IEnumerable<VoteResult> GetVoteResults();
 }

@@ -5,7 +5,7 @@ namespace PAEG.PersistenceLayer.DataProvider.Abstract;
 public interface ITableProvider
 {
     public List<EncodingTable> GetAllEncodingTables();
-    public List<DecodingTable> GetAllDecodingTables();
-    public EncodingTable GetEncodingByIdBallot(int idBallot);
-    public DecodingTable GetDecodingByIdBallot(int idBallot);
+
+    public void SaveEncodingTable(EncodingTable encodingTable);
+    public EncodingTable GetEncodingByIdBallot(Guid guid);
 }

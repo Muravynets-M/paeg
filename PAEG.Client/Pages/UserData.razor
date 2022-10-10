@@ -5,7 +5,7 @@
 <PageTitle>User data</PageTitle>
 <h1>User Data</h1>
 
-@if (userPrivateData == null)
+@if (userData == null)
 {
     <p>
         <em>Loading...</em>
@@ -16,22 +16,16 @@ else
     <table class="table">
         <thead>
         <tr>
-            <th width="5%">Idballot</th>
             <th width="5%">Email</th>
-            <th width="30%">Modulus</th>
-            <th width="30%">Exponent</th>
-            <th width="30%">D</th>
+            <th width="95%">Ballots</th>
         </tr>
         </thead>
         <tbody>
-        @foreach (var data in userPrivateData)
+        @foreach (var user in userData)
         {
             <tr>
-                <td>@data.IdBallot</td>
-                <td>@data.Email</td>
-                <td>@data.Modulus.Aggregate("", (s, b) => s + b + " ")</td>
-                <td>@data.Exponent.Aggregate("", (s, b) => s + b + " ")</td>
-                <td>@data.D.Aggregate("", (s, b) => s + b + " ")</td>
+                <td>@user.Email</td>
+                <td>@BallotToString(user.BallotPacks)</td>
             </tr>
         }
         </tbody>
@@ -39,11 +33,20 @@ else
 }
 
 @code {
-    private UserPrivateData[]? userPrivateData;
+    private Model.UserData[]? userData;
 
     protected override async Task OnInitializedAsync()
     {
-        userPrivateData = await Http.GetFromJsonAsync<UserPrivateData[]>(Http.BaseAddress + "/user-data/get-all?private=true");
+        userData = await Http.GetFromJsonAsync<Model.UserData[]>(Http.BaseAddress + "/user-data/get-all?private=true");
     }
 
+    private string BallotToString(IEnumerable<IEnumerable<Ballot>> ballotPacks)
+    {
+        return ballotPacks
+            .Take(1)
+            .Aggregate("", (acc, item) =>
+                acc + item.Aggregate("", (innerAcc, innerItem) =>
+                    $"{innerAcc} {innerItem.Id}: ( {innerItem.Candidate} )")
+            );
+    }
 }

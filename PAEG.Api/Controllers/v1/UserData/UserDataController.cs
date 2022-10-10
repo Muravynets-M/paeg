@@ -20,9 +20,9 @@ public class UserDataController
     {
         if (sendPrivate.HasValue && sendPrivate.Value)
         {
-            return _userDataProvider.GetPrivateUserData();
+            return _userDataProvider.GetUserData();
         }
 
-        return _userDataProvider.GetPublicUserData();
+        return _userDataProvider.GetUserData();
     }
 }

@@ -20,10 +20,4 @@ public class TableController
     {
         return _tableProvider.GetAllEncodingTables();
     }
-
-    [HttpGet("decoding")]
-    public IEnumerable<DecodingTable> GetDecodingTables()
-    {
-        return _tableProvider.GetAllDecodingTables();
-    }
 }
