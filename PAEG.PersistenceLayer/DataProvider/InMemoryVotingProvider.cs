@@ -5,20 +5,20 @@ using PAEG.PersistenceLayer.Entity;
 
 namespace PAEG.PersistenceLayer.DataProvider;
 
-public class InMemoryVotingDataProvider : IVotingCentreDataProvider {
+public class InMemoryVotingProvider : IVotingCentreProvider {
     private static PrivateVotingCentre _votingCentre = null!;
     private static List<UserVoteEntity> _userVotes = new();
     private static List<VoteResult> _voteResults = new();
 
-    static InMemoryVotingDataProvider()
+    static InMemoryVotingProvider()
     {
         GenerateData();
     }
 
     private static void GenerateData()
     {
-        using var rsa = RSA.Create();
-        _votingCentre = new PrivateVotingCentre(rsa.ExportParameters(true));
+        using var dsa = DSA.Create();
+        _votingCentre = new PrivateVotingCentre(dsa.ExportParameters(true));
     }
 
     public PrivateVotingCentre VotingCentre => _votingCentre;
@@ -33,15 +33,14 @@ public class InMemoryVotingDataProvider : IVotingCentreDataProvider {
         _voteResults.Add(voteResult);
     }
 
-    public bool HasBallotBeenUsed(int idBallot)
+    public bool HasBallotBeenUsed(string ballot)
     {
-        return _voteResults.Exists(v => v.IdBallot == idBallot);
+        return _voteResults.Exists(v => v.Ballot == ballot);
     }
 
-    public IEnumerable<UserVote> GetVotesByIdBallotOrdered(int idBallot)
+    public IEnumerable<UserVote> GetVotes()
     {
         return _userVotes
-            .Where(v => v.UserVote.IdBallot == idBallot)
             .OrderBy(v => v.DateTime)
             .Select(v => v.UserVote);
     }

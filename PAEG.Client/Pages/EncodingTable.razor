@@ -17,20 +17,18 @@ else
         <tr>
             <th width="5%">Idballot</th>
             <th width="5%">Vote</th>
-            <th width="30%">Gamma</th>
-            <th width="30%">Signed Hash</th>
-            <th width="30%">Encrypted Hash</th>
+            <th width="45%">ElGamal</th>
+            <th width="45%">Signed Hash</th>
         </tr>
         </thead>
         <tbody>
         @foreach (var data in encodingTables)
         {
             <tr>
-                <td>@data.IdBallot</td>
+                <td>@data.Ballot</td>
                 <td>@data.Vote</td>
-                <td>@data.Gamma.Aggregate("", (s, b) => s + b + " ")</td>
-                <td>@data.SignedHash.Aggregate("", (s, b) => s + b + " ")</td>
-                <td>@data.EncryptedHash.Aggregate("", (s, b) => s + b + " ")</td>
+                <td>@data.ElGamal!.Aggregate("", (s, b) => s + b + " ")</td>
+                <td>@data.SignedHash!.Aggregate("", (s, b) => s + b + " ")</td>
             </tr>
         }
         </tbody>

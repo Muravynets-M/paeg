@@ -2,7 +2,7 @@ using PAEG.Model;
 
 namespace PAEG.PersistenceLayer.DataProvider.Abstract;
 
-public interface IVotingCentreDataProvider
+public interface IVotingCentreProvider
 {
     public PrivateVotingCentre VotingCentre { get; }
 
@@ -10,9 +10,9 @@ public interface IVotingCentreDataProvider
 
     public void CountVote(VoteResult voteResult);
 
-    public bool HasBallotBeenUsed(int idBallot);
+    public bool HasBallotBeenUsed(string ballot);
 
-    public IEnumerable<UserVote> GetVotesByIdBallotOrdered(int idBallot);
+    public IEnumerable<UserVote> GetVotes();
 
     public IEnumerable<VoteResult> GetVoteResults();
 }

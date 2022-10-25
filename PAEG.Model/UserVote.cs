@@ -2,12 +2,14 @@ namespace PAEG.Model;
 
 public class UserVote
 {
-    public int IdBallot { get; }
+    public string Ballot { get; }
+    
+    public string Identification { get; set; }
     public byte[] Sign { get; set; }
     public byte[] EncryptedVote { get; set; }
 
-    public UserVote(int idBallot)
+    public UserVote(string ballot)
     {
-        IdBallot = idBallot;
+        Ballot = ballot;
     }
 }

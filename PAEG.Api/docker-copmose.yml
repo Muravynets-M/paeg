@@ -1,0 +1,23 @@
+version: "3.4"
+# A service definition contains a configuration that is applied to each container
+# started for that service, much like passing command-line parameters to docker run
+services:
+  # Define a service called 'sampleapi'
+  page-api:
+    # Specify the image to start the container from
+    image: paeg.api
+    # Configuration options that are applied at build time.
+    build:
+      # Either a path to a directory containing a Dockerfile
+      context: .
+      # Compose uses an alternate file to build with. A build path must also be specified.
+      dockerfile: ./Dockerfile
+    # Expose ports (HOST:CONTAINER)
+    ports:
+      - "5002:5002"
+    # Set environment variables
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    # Mount host directories to container directories
+    volumes:
+      - ~/.vsdbg:/remote_debugger:rw

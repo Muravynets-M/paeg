@@ -16,22 +16,16 @@ else
     <table class="table">
         <thead>
         <tr>
-            <th width="5%">Idballot</th>
-            <th width="5%">Email</th>
-            <th width="30%">Modulus</th>
-            <th width="30%">Exponent</th>
-            <th width="30%">D</th>
+            <th width="25%">Email</th>
+            <th width="25%">Identification</th>
         </tr>
         </thead>
         <tbody>
         @foreach (var data in userPrivateData)
         {
             <tr>
-                <td>@data.IdBallot</td>
                 <td>@data.Email</td>
-                <td>@data.Modulus.Aggregate("", (s, b) => s + b + " ")</td>
-                <td>@data.Exponent.Aggregate("", (s, b) => s + b + " ")</td>
-                <td>@data.D.Aggregate("", (s, b) => s + b + " ")</td>
+                <td>@data.Identitification</td>
             </tr>
         }
         </tbody>

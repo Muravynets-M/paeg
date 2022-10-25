@@ -1,5 +1,6 @@
 @page "/vote"
 @using Microsoft.Extensions.Logging
+@using PAEG.Model
 @using PAEG.Model.Model
 @inject ILogger<Vote> Logger
 @inject HttpClient Http
@@ -12,7 +13,9 @@
 
         <div class="form-group">
             <label for="email">Email</label>
-            <InputText class="form-control" id="email" @bind-Value="_vote.Email"></InputText>
+            <InputText class="form-control" id="email" @bind-Value="_vote.Email" @oninput="(e) => OnEmailInput((string) e.Value)">
+
+            </InputText>
             @if (Error != null)
             {
                 <div class="form-text alert-warning">@Error</div>
@@ -20,8 +23,13 @@
         </div>
 
         <div class="form-group">
-            <label for="idBallot">Id Ballot</label>
-            <InputNumber class="form-control" id="idBallot" @bind-Value="_vote.IdBallot"></InputNumber>
+            <label for="identification">Identification</label>
+            <InputText class="form-control" id="identification" @bind-Value="_vote.Identification"></InputText>
+        </div>
+
+        <div class="form-group">
+            <label for="ballot">Ballot</label>
+            <InputText class="form-control" id="ballot" @bind-Value="_vote.Ballot"></InputText>
         </div>
 
         <div class="form-group">
@@ -39,6 +47,9 @@
 @code {
     private VoteModel _vote = new();
 
+    private List<UserPrivateData> _users = new List<UserPrivateData>();
+    private List<RegistrationListModel> _registrations = new List<RegistrationListModel>();
+
     private string? Error;
 
     private async void HandleValidSubmit()
@@ -49,10 +60,32 @@
         var result = await Http.PostAsJsonAsync(Http.BaseAddress + "/voting", _vote);
         if (!result.IsSuccessStatusCode)
         {
-            Error = "User with such email was not found";
+            Error = await result.Content.ReadAsStringAsync();
         }
-        
+
         StateHasChanged();
     }
 
+    private void OnEmailInput(string newEmail)
+    {
+        var user = _users.FirstOrDefault(u => u.Email == newEmail);
+        if (user != null)
+        {
+            _vote.Identification = user.Identitification;
+        }
+
+        var ballot = _registrations.FirstOrDefault(r => r.Email == newEmail);
+        if (ballot != null)
+        {
+            _vote.Ballot = ballot.Ballot;
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        _registrations = await Http.GetFromJsonAsync<List<RegistrationListModel>>(Http.BaseAddress + "/registration/list") ??
+                         new List<RegistrationListModel>();
+        _users = await Http.GetFromJsonAsync<List<UserPrivateData>>(Http.BaseAddress + "/user-data/get-all?private=true") ??
+                 new List<UserPrivateData>();
+    }
 }

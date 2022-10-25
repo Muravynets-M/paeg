@@ -10,13 +10,14 @@ public static class DependencyInjection
     public static IServiceCollection AddPersistenceLayer(this IServiceCollection services,
         IConfiguration configuration)
     {
-        var userdataProvider = new InMemoryUserDataProvider(
+        var userdataProvider = new InMemoryUserProvider(
             int.Parse(configuration["UserAmount"]),
             configuration["Candidates"].Length
         );
-        services.AddSingleton<IUserDataProvider>(_ => userdataProvider);
+        services.AddSingleton<IUserProvider>(_ => userdataProvider);
         services.AddSingleton<ITableProvider, InMemoryTableProvider>();
-        services.AddSingleton<IVotingCentreDataProvider, InMemoryVotingDataProvider>();
+        services.AddSingleton<IVotingCentreProvider, InMemoryVotingProvider>();
+        services.AddSingleton<IRegistrationProvider, RegistrationProvider>();
 
         return services;
     }

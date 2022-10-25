@@ -2,9 +2,8 @@ using PAEG.Model;
 
 namespace PAEG.PersistenceLayer.DataProvider.Abstract;
 
-public interface IUserDataProvider
+public interface IUserProvider
 {
     IEnumerable<UserPrivateData> GetPrivateUserData();
-    IEnumerable<UserData> GetPublicUserData();
     UserPrivateData? GetPrivateUserDataByEmail(string email);
 }

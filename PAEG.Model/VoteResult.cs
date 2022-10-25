@@ -1,3 +1,3 @@
 namespace PAEG.Model; 
 
-public record VoteResult(int IdBallot, int Candidate);
+public record VoteResult(string Ballot, string Identification, int Candidate);

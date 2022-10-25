@@ -4,15 +4,15 @@ using PAEG.PersistenceLayer.DataProvider.Abstract;
 namespace PAEG.BusinessLayer.Chains.Encoding;
 
 public class TerminalEncoder: IEncodingChain {
-    private IVotingCentreDataProvider _votingCentreDataProvider;
+    private IVotingCentreProvider _votingCentreProvider;
 
-    public TerminalEncoder(IVotingCentreDataProvider votingCentreDataProvider)
+    public TerminalEncoder(IVotingCentreProvider votingCentreProvider)
     {
-        _votingCentreDataProvider = votingCentreDataProvider;
+        _votingCentreProvider = votingCentreProvider;
     }
     
     public void Encode(UserVote userVote, UserPrivateData userSecret)
     {
-        _votingCentreDataProvider.SaveVote(userVote);
+        _votingCentreProvider.SaveVote(userVote);
     }
 }

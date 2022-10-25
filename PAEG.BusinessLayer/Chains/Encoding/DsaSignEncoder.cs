@@ -5,11 +5,11 @@ using PAEG.PersistenceLayer.DataProvider.Abstract;
 
 namespace PAEG.BusinessLayer.Chains.Encoding;
 
-public class RsaSignEncoder : IEncodingChain {
+public class DsaSignEncoder : IEncodingChain {
     private readonly IEncodingChain? _next;
     private readonly ITableProvider _tableProvider;
 
-    public RsaSignEncoder(IEncodingChain? next,
+    public DsaSignEncoder(IEncodingChain? next,
         ITableProvider tableProvider)
     {
         _next = next;
@@ -18,12 +18,15 @@ public class RsaSignEncoder : IEncodingChain {
 
     public void Encode(UserVote userVote, UserPrivateData userSecret)
     {
-        using var rsa = RSACryptoServiceProvider.Create();
-        rsa.ImportParameters(userSecret.RsaParameters);
+        using var dsa = DSACryptoServiceProvider.Create();
+        dsa.ImportParameters(userSecret.DsaParameters);
 
-        var signedVote = rsa.SignData(BitConverter.GetBytes(userVote.IdBallot), HashAlgorithmName.SHA512,
-        RSASignaturePadding.Pkcs1);
-        _tableProvider.GetEncodingByIdBallot(userVote.IdBallot).SignedHash = signedVote;
+        var signedVote = dsa.SignData(
+            userVote.EncryptedVote,
+            HashAlgorithmName.SHA512,
+            DSASignatureFormat.Rfc3279DerSequence
+        );
+        _tableProvider.GetEncodingByIdBallot(userVote.Ballot).SignedHash = signedVote;
         userVote.Sign = signedVote;
 
         _next?.Encode(userVote, userSecret);

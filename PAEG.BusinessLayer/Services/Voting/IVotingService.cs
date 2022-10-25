@@ -2,5 +2,5 @@ namespace PAEG.BusinessLayer.Services.Voting;
 
 public interface IVotingService
 {
-    void Vote(string userEmail, int idBallot, int candidate);
+    void Vote(string email, string identification, string ballot, int candidate);
 }

@@ -8,25 +8,27 @@ namespace PAEG.BusinessLayer.Services.Voting;
 
 public class VotingService : IVotingService
 {
-    private readonly IUserDataProvider _userDataProvider;
+    private readonly IUserProvider _userProvider;
     private readonly IEncodingChain _encodingChain;
     private readonly ITableProvider _tableProvider;
 
     public VotingService(IEncodingChain encodingChain,
         ITableProvider tableProvider,
-        IUserDataProvider userDataProvider)
+        IUserProvider userProvider)
     {
         _encodingChain = encodingChain;
         _tableProvider = tableProvider;
-        _userDataProvider = userDataProvider;
+        _userProvider = userProvider;
     }
 
-    public void Vote(string userEmail, int idBallot, int candidate)
+    public void Vote(string email, string identification, string ballot, int candidate)
     {
-        var vote = BitConverter.GetBytes(idBallot + candidate);
-        _tableProvider.GetEncodingByIdBallot(idBallot).Vote = idBallot + candidate;
+        var vote = BitConverter.GetBytes(candidate);
+        var table = _tableProvider.GetEncodingByIdBallot(ballot);
+        table.Vote = candidate;
+        table.Identification = identification;
 
-        _encodingChain.Encode(new UserVote(idBallot) {EncryptedVote = vote},
-            _userDataProvider.GetPrivateUserDataByEmail(userEmail) ?? throw new UserNotFoundException());
+        _encodingChain.Encode(new UserVote(ballot) {EncryptedVote = vote, Identification = identification},
+            _userProvider.GetPrivateUserDataByEmail(email) ?? throw new UserNotFoundException());
     }
 }

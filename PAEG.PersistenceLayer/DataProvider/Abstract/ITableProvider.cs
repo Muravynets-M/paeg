@@ -6,6 +6,6 @@ public interface ITableProvider
 {
     public List<EncodingTable> GetAllEncodingTables();
     public List<DecodingTable> GetAllDecodingTables();
-    public EncodingTable GetEncodingByIdBallot(int idBallot);
-    public DecodingTable GetDecodingByIdBallot(int idBallot);
+    public EncodingTable GetEncodingByIdBallot(string idBallot);
+    public DecodingTable GetDecodingByIdBallot(string idBallot);
 }

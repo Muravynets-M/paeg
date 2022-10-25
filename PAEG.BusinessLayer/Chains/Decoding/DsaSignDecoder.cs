@@ -17,15 +17,19 @@ public class RsaSignDecoder : IDecodingChain {
 
     public void Decode(UserVote userVote, UserPrivateData userSecret, PrivateVotingCentre votingCentre)
     {
-        using var rsa = RSACryptoServiceProvider.Create();
-        rsa.ImportParameters(userSecret.RsaParameters);
+        using var dsa = DSACryptoServiceProvider.Create();
+        dsa.ImportParameters(userSecret.DsaParameters);
 
-        if (!rsa.VerifyData(BitConverter.GetBytes(userVote.IdBallot), userVote.Sign, HashAlgorithmName.SHA512,
-            RSASignaturePadding.Pkcs1))
+        if (!dsa.VerifyData(
+                userVote.EncryptedVote,
+                userVote.Sign, HashAlgorithmName.SHA512,
+                DSASignatureFormat.Rfc3279DerSequence)
+           )
         {
             throw new InvalidSignException();
         }
-        _tableProvider.GetDecodingByIdBallot(userVote.IdBallot).SignVerified = true;
+        
+        _tableProvider.GetDecodingByIdBallot(userVote.Ballot).SignVerified = true;
 
         _next?.Decode(userVote, userSecret, votingCentre);
     }

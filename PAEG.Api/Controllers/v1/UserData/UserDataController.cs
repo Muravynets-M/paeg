@@ -6,23 +6,19 @@ namespace PAEG.Api.Controllers.v1.UserData;
 
 [Route("api/v1/user-data")]
 [ApiController]
-public class UserDataController
-{
-    private readonly IUserDataProvider _userDataProvider;
+public class UserDataController {
+    private readonly IUserProvider _userProvider;
 
-    public UserDataController(IUserDataProvider userDataProvider)
+    public UserDataController(IUserProvider userProvider)
     {
-        _userDataProvider = userDataProvider;
+        _userProvider = userProvider;
     }
 
     [HttpGet("get-all")]
-    public IEnumerable<Model.UserData> GetUserData([FromQuery(Name = "private")]bool? sendPrivate)
+    public IEnumerable<Model.UserPrivateData> GetUserData([FromQuery(Name = "private")] bool? sendPrivate)
     {
-        if (sendPrivate.HasValue && sendPrivate.Value)
-        {
-            return _userDataProvider.GetPrivateUserData();
-        }
+        var users = _userProvider.GetPrivateUserData();
 
-        return _userDataProvider.GetPublicUserData();
+        return users;
     }
 }

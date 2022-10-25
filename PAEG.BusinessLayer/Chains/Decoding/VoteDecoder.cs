@@ -6,40 +6,26 @@ namespace PAEG.BusinessLayer.Chains.Decoding;
 
 public class VoteDecoder: IDecodingChain {
     private readonly ITableProvider _tableProvider;
-    private readonly IVotingCentreDataProvider _votingCentreDataProvider;
+    private readonly IVotingCentreProvider _votingCentreProvider;
     private readonly int _candidateCount;
 
-    public VoteDecoder(ITableProvider tableProvider, IVotingCentreDataProvider votingCentreDataProvider, int candidateCount)
+    public VoteDecoder(ITableProvider tableProvider, IVotingCentreProvider votingCentreProvider, int candidateCount)
     {
         _tableProvider = tableProvider;
-        _votingCentreDataProvider = votingCentreDataProvider;
+        _votingCentreProvider = votingCentreProvider;
         _candidateCount = candidateCount;
     }
 
     public void Decode(UserVote userVote, UserPrivateData userSecret, PrivateVotingCentre votingCentre)
     {
-        var vote = BitConverter.ToInt32(userVote.EncryptedVote).ToString();
-        _tableProvider.GetDecodingByIdBallot(userVote.IdBallot).Vote = int.Parse(vote);
+        var vote = int.Parse(BitConverter.ToInt32(userVote.EncryptedVote).ToString());
+        _tableProvider.GetDecodingByIdBallot(userVote.Ballot).Vote = vote;
 
-        if ($"{vote[.._candidateCount.ToString().Length]}" != userVote.IdBallot.ToString()[.._candidateCount.ToString().Length])
-        {
-            throw new InvalidBallotIdException();
-        }
-        
-        if (charToInt(vote[_candidateCount.ToString().Length]) > _candidateCount || charToInt(vote[_candidateCount.ToString().Length]) < 1)
+        if (vote > _candidateCount || vote < 1)
         {
             throw new InvalidCandidateException();
         }
 
-        if (_votingCentreDataProvider.HasBallotBeenUsed(userVote.IdBallot))
-        {
-            throw new BallotAlreadyUsedException();
-        }
-        
-        _votingCentreDataProvider.CountVote(new VoteResult(userVote.IdBallot, charToInt(vote[_candidateCount.ToString().Length])));
-    }
-    private static int charToInt(char c)
-    {
-        return c - '0';
+        _votingCentreProvider.CountVote(new VoteResult(userVote.Ballot, userVote.Identification, vote));
     }
 }

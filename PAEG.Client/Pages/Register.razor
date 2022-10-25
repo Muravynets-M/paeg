@@ -1,0 +1,82 @@
+@page "/register"
+@using PAEG.Model.Model
+@inject HttpClient Http
+
+<h3>Register for voting</h3>
+
+<form class="w-25">
+    <EditForm Model="@_registrationModel" OnValidSubmit="@HandleValidSubmit">
+        <DataAnnotationsValidator/>
+        <ValidationSummary/>
+
+        <div class="form-group">
+            <label for="email">Email</label>
+            <InputText class="form-control" id="email" @bind-Value="_registrationModel.Email"></InputText>
+            @if (Error != null)
+            {
+                <div class="form-text alert-warning">@Error</div>
+            }
+        </div>
+
+        <br/>
+        <button class="btn btn-primary" type="submit">Submit</button>
+    </EditForm>
+</form>
+@if (_registeredModels != null)
+{
+    <table class="table">
+        <thead>
+        <tr>
+            <th width="25%">Email</th>
+            <th width="25%">Ballot</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var data in _registeredModels)
+        {
+            <tr>
+                <td>@data.Email</td>
+                <td>@data.Ballot</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<RegistrationListModel>? _registeredModels = null;
+    private readonly RegistrationModel _registrationModel = new();
+
+    private string? Error;
+
+    private async void HandleValidSubmit()
+    {
+        Error = null;
+
+        var result = await Http.PostAsJsonAsync(Http.BaseAddress + "/registration", _registrationModel);
+        if (!result.IsSuccessStatusCode)
+        {
+            Error = await result.Content.ReadAsStringAsync();
+            StateHasChanged();
+
+            return;
+        }
+
+        var resultModel = await result.Content.ReadFromJsonAsync<RegistrationResultModel>();
+
+        OnInitializedAsync();
+        StateHasChanged();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var listRegistered = await Http.GetFromJsonAsync<List<RegistrationListModel>>(Http.BaseAddress + "/registration/list");
+        if (listRegistered!.Count == 0)
+        {
+            _registeredModels = null;
+            return;
+        }
+
+        _registeredModels = listRegistered;
+    }
+}

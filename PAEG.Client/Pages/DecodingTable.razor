@@ -18,10 +18,9 @@ else
             <th width="5%">Idballot</th>
             <th width="5%">Vote</th>
             <th width="10%">Sign Verified</th>
-            <th width="30%">Decrypted Hash</th>
-            <th width="30%">Gamma</th>
-            <th width="10%">Vote</th>
-            <th width="10%">Exception</th>
+            <th width="40%">Decrypted Hash</th>
+            <th width="5%">Vote</th>
+            <th width="15%">Exception</th>
         </tr>
         </thead>
         <tbody>
@@ -32,7 +31,6 @@ else
                 <td>@data.Vote</td>
                 <td>@data.SignVerified</td>
                 <td>@data.DecryptedHash?.Aggregate("", (s, b) => s + b + " ")</td>
-                <td>@data.Bytes?.Aggregate("", (s, b) => s + b + " ")</td>
                 <td>@data.Vote</td>
                 <td>@data.Exception</td>
             </tr>

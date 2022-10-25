@@ -2,17 +2,15 @@ namespace PAEG.Model;
 
 public class DecodingTable
 {
-    public DecodingTable(int idBallot)
+    public DecodingTable(string idBallot)
     {
         IdBallot = idBallot;
     }
 
-    public int IdBallot { get; }
+    public string IdBallot { get; }
     
     public bool SignVerified { get; set; }
     public byte[] DecryptedHash { get; set; }
-    public byte[] Gamma { get; set; }
-    public byte[] Bytes { get; set; }
     public int Vote { get; set; }
     
     public string? Exception { get; set; }

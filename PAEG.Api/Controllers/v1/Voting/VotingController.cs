@@ -14,13 +14,13 @@ namespace PAEG.Api.Controllers.v1.Voting;
 public class VotingController {
     private readonly IVotingService _votingService;
     private readonly ICalculationService _calculationService;
-    private readonly IVotingCentreDataProvider _votingCentreDataProvider;
+    private readonly IVotingCentreProvider _votingCentreProvider;
 
-    public VotingController(IVotingService votingService, ICalculationService calculationService, IVotingCentreDataProvider votingCentreDataProvider)
+    public VotingController(IVotingService votingService, ICalculationService calculationService, IVotingCentreProvider votingCentreProvider)
     {
         _votingService = votingService;
         _calculationService = calculationService;
-        _votingCentreDataProvider = votingCentreDataProvider;
+        _votingCentreProvider = votingCentreProvider;
     }
 
     [HttpPost]
@@ -28,13 +28,13 @@ public class VotingController {
     {
         try
         {
-            _votingService.Vote(voteModel.Email ?? "", voteModel.IdBallot ?? 0, voteModel.Candidate ?? 0);
+            _votingService.Vote(voteModel.Email!, voteModel.Identification!, voteModel.Ballot!, voteModel.Candidate ?? 0);
 
             return new OkResult();
         }
         catch (BusinessException exception)
         {
-            return new NotFoundResult();
+            return new BadRequestObjectResult(exception.ToString());
         }
     }
 
@@ -47,6 +47,6 @@ public class VotingController {
     [HttpGet("results")]
     public IEnumerable<VoteResult> GetResults()
     {
-        return _votingCentreDataProvider.GetVoteResults();
+        return _votingCentreProvider.GetVoteResults();
     }
 }
