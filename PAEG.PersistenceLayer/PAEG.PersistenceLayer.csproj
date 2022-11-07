@@ -7,6 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <PackageReference Include="ElGamalExt" Version="0.9.3.32706" />
       <PackageReference Include="Faker.Net" Version="2.0.154" />
       <PackageReference Include="Microsoft.Extensions.Configuration" Version="6.0.1" />
       <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />

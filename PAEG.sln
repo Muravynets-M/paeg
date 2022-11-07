@@ -1,7 +1,5 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PAEG.Api", "PAEG.Api\PAEG.Api.csproj", "{93B8220C-A2ED-431E-8D9F-6CF2307B2AA1}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PAEG.BusinessLayer", "PAEG.BusinessLayer\PAEG.BusinessLayer.csproj", "{46FAE8A3-8FA0-4627-AAD7-C2C7A2211073}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PAEG.PersistenceLayer", "PAEG.PersistenceLayer\PAEG.PersistenceLayer.csproj", "{12AB949A-7778-496F-BB1A-138D77DC6368}"
@@ -10,7 +8,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PAEG.Model", "PAEG.Model\PA
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PAEG.DI", "PAEG.DI\PAEG.DI.csproj", "{74EF039C-0BA2-41DE-9FF8-83F5DC6790E1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PAEG.Client", "PAEG.Client\PAEG.Client.csproj", "{1F1E4AFC-9CF2-420E-9B2B-DB24AC346638}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PAEG.BusinessLayer.Test", "PAEG.BusinessLayer.Test\PAEG.BusinessLayer.Test.csproj", "{327C5DBC-6915-49E1-B11E-6C53BE643346}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -18,10 +16,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{93B8220C-A2ED-431E-8D9F-6CF2307B2AA1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{93B8220C-A2ED-431E-8D9F-6CF2307B2AA1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{93B8220C-A2ED-431E-8D9F-6CF2307B2AA1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{93B8220C-A2ED-431E-8D9F-6CF2307B2AA1}.Release|Any CPU.Build.0 = Release|Any CPU
 		{46FAE8A3-8FA0-4627-AAD7-C2C7A2211073}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{46FAE8A3-8FA0-4627-AAD7-C2C7A2211073}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{46FAE8A3-8FA0-4627-AAD7-C2C7A2211073}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -38,9 +32,9 @@ Global
 		{74EF039C-0BA2-41DE-9FF8-83F5DC6790E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{74EF039C-0BA2-41DE-9FF8-83F5DC6790E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{74EF039C-0BA2-41DE-9FF8-83F5DC6790E1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1F1E4AFC-9CF2-420E-9B2B-DB24AC346638}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1F1E4AFC-9CF2-420E-9B2B-DB24AC346638}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1F1E4AFC-9CF2-420E-9B2B-DB24AC346638}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1F1E4AFC-9CF2-420E-9B2B-DB24AC346638}.Release|Any CPU.Build.0 = Release|Any CPU
+		{327C5DBC-6915-49E1-B11E-6C53BE643346}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{327C5DBC-6915-49E1-B11E-6C53BE643346}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{327C5DBC-6915-49E1-B11E-6C53BE643346}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{327C5DBC-6915-49E1-B11E-6C53BE643346}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
