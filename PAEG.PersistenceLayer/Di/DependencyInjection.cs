@@ -11,11 +11,9 @@ public static class DependencyInjection
         IConfiguration configuration)
     {
         var userdataProvider = new InMemoryVoterProvider(
-            int.Parse(configuration["UserAmount"]),
-            configuration["Candidates"].Length
+            int.Parse(configuration["UserAmount"])
         );
         services.AddSingleton<IVoterProvider>(_ => userdataProvider);
-        services.AddSingleton<IVoterRandomStringsProvider, VoterRandomStringsProvider>();
 
         return services;
     }
