@@ -3,4 +3,4 @@ using System.Security.Cryptography;
 
 namespace PAEG.Model;
 
-public record UserPrivateData(int Id, DSAParameters DsaParameters);
+public record UserPrivateData(int Id, RSAParameters RsaParameters);

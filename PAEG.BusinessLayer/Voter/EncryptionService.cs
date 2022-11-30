@@ -1,54 +1,65 @@
+using System.Security.Cryptography;
+using PAEG.BusinessLayer.Encryption;
+using PAEG.BusinessLayer.Exceptions;
 using PAEG.Model;
 using PAEG.PersistenceLayer.DataProvider.Abstract;
-using System.Security.Cryptography;
 
-namespace PAEG.BusinessLayer.Voter; 
+namespace PAEG.BusinessLayer.Voter;
 
-public class EncryptionService: IEncryptionService {
+public class EncryptionService : IEncryptionService
+{
     private readonly IVoterProvider _voterProvider;
-    private readonly IVoterRandomStringsProvider _stringsProvider;
-    
-    public EncryptionService(IVoterProvider voterProvider, IVoterRandomStringsProvider stringsProvider)
+    private readonly IEcProvider _ecProvider;
+    private readonly ICecProvider _cecProvider;
+
+    public EncryptionService(IVoterProvider voterProvider, IEcProvider ecProvider, ICecProvider cecProvider)
     {
         _voterProvider = voterProvider;
-        _stringsProvider = stringsProvider;
-    }
-    
-    public EncryptedBallot EncryptVote(int idVoter, byte[] vote)
-    {
-        var (encryptedVote, randomStringBytes) = AddStringToBytes(Faker.Internet.UserName(), vote);
-        _stringsProvider.Save(idVoter, 0, randomStringBytes);
-
-        foreach (var voters in _voterProvider.GetPrivateUserData())
-        {
-            using var rsa = RSA.Create();
-            rsa.ImportParameters(voters.RsaParametersShort);
-
-            encryptedVote = rsa.Encrypt(encryptedVote, RSAEncryptionPadding.Pkcs1);
-        }
-
-        var i = 1;
-        foreach (var voter in _voterProvider.GetPrivateUserData())
-        {
-            using var rsa = RSA.Create();
-            rsa.ImportParameters(voter.RsaParametersLong);
-
-            (encryptedVote, var randomString) = AddStringToBytes(Faker.Internet.UserName(), encryptedVote);
-            _stringsProvider.Save(idVoter, i++, randomString);
-
-            encryptedVote = rsa.Encrypt(encryptedVote, RSAEncryptionPadding.Pkcs1);
-        }
-
-        return new EncryptedBallot {IdBallot = idVoter, Ballot = encryptedVote};
+        _ecProvider = ecProvider;
+        _cecProvider = cecProvider;
     }
 
-    private (byte[], byte[])  AddStringToBytes(string stringToAdd, byte[] bytes)
+    public List<SignedBallot> EncryptAndSplitBallots(int idVoter, int candidate)
     {
-        var stringBytes = stringToAdd
-            .SelectMany(BitConverter.GetBytes)
-            .Take(IEncryptionService.RandomStringLength)
-            .ToArray();
+        var voter = _voterProvider.GetPrivateUserDataById(idVoter)!;
 
-        return (bytes.Concat(stringBytes).ToArray(), stringBytes);
+        var factor = GetFactors(candidate);
+        
+        using var dsa = RSACryptoServiceProvider.Create();
+        dsa.ImportParameters(voter.RsaParameters);
+        var sign = dsa.SignData(
+            BitConverter.GetBytes(idVoter),
+            HashAlgorithmName.SHA1,
+            RSASignaturePadding.Pkcs1
+        );
+        
+        var signedBallots = new List<SignedBallot>
+        {
+            new SignedBallot
+            {
+                IdUser = idVoter,
+                Sign = sign,
+                Ballot = HardcodedRsa.Encrypt(factor),
+            },
+            new SignedBallot
+            {
+                IdUser = idVoter,
+                Sign = sign,
+                Ballot = HardcodedRsa.Encrypt(candidate/factor)
+            }
+        };
+
+        return signedBallots;
+    }
+
+    private int GetFactors(int number)
+    {
+        for (var i = 2; i < number / 2; i++)
+        {
+            if (number % i == 0)
+                return i;
+        }
+
+        throw new ArgumentException($"{number}");
     }
 }

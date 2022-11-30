@@ -14,6 +14,9 @@ public static class DependencyInjection
             int.Parse(configuration["UserAmount"])
         );
         services.AddSingleton<IVoterProvider>(_ => userdataProvider);
+        services.AddSingleton<ICandidateProvider, InMemoryCandidateProvider>();
+        services.AddSingleton<IEcProvider, InMemoryEcDataProvide>();
+        services.AddSingleton<ICecProvider, InMemoryCecProvider>();
 
         return services;
     }

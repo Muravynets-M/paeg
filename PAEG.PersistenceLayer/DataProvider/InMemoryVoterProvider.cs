@@ -11,7 +11,7 @@ public class InMemoryVoterProvider : IVoterProvider {
     {
         for (var i = 1; i <= userAmount; i++)
         {
-            using var dsa = DSACryptoServiceProvider.Create();
+            using var dsa = RSACryptoServiceProvider.Create();
             Data.Add(new UserPrivateData(
                     i,
                     dsa.ExportParameters(true)

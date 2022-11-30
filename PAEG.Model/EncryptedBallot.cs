@@ -1,6 +1,6 @@
 namespace PAEG.Model; 
 
 public class EncryptedBallot {
-    public int IdBallot { get; set; }
-    public byte[] Ballot { get; set; }
+    public int IdUser { get; set; }
+    public int Ballot { get; set; }
 }

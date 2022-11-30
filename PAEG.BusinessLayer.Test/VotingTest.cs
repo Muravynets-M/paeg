@@ -1,101 +1,98 @@
+using System.Security.Cryptography;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using PAEG.BusinessLayer.Di;
-using PAEG.BusinessLayer.Exceptions;
+using PAEG.BusinessLayer.Encryption;
 using PAEG.BusinessLayer.Voter;
 using PAEG.DI;
-using PAEG.Model;
 using PAEG.PersistenceLayer.DataProvider.Abstract;
 
 namespace PAEG.BusinessLayer.Test;
 
-public class VotingTest {
+public class VotingTest
+{
+
+    private IEcSendingService _ecSendingService;
     private IEncryptionService _encryptionService;
-    private IDecryptionService _decryptionService;
-    private IVotesCalculationService _votesCalculationService;
+    private ICalculationService _calculationService;
 
+    private ICandidateProvider _candidateProvider;
     private IVoterProvider _voterProvider;
-
+    private IEcProvider _ecProvider;
+    
     private readonly IDictionary<int, int> _votes = new Dictionary<int, int>();
 
     public VotingTest()
     {
         BuildDependencies();
+        var candidates = _candidateProvider.GetAllCandidates();
 
-        _votes[1] = 1;
-        _votes[2] = 2;
-        _votes[3] = 1;
-        _votes[4] = 1;
+        _votes[1] = candidates[0].Id;
+        _votes[2] = candidates[1].Id;
+        _votes[3] = candidates[0].Id;
+        _votes[4] = candidates[0].Id;
     }
 
     [Fact]
-    public void TestSuccess()
+    public void TestRsaHomomorphic()
     {
-        var voters = _voterProvider.GetPrivateUserData().ToList();
+        var a = 2;
+        var b = 16;
 
-        var encryptedVotes =
-            from voter in voters
-            let voteBytes = BitConverter.GetBytes(_votes[voter.Id])
-            select _encryptionService.EncryptVote(voter.Id, voteBytes);
+        var aEncoded = HardcodedRsa.Encrypt(a);
+        var bEncoded = HardcodedRsa.Encrypt(b);
+        
+        var aTimesBEncoded = HardcodedRsa.Encrypt(a * b);
 
-        voters.Reverse();
-        encryptedVotes = voters
-            .Aggregate(encryptedVotes, (current, voter) =>
-                _decryptionService.DecryptVote(voter.Id, current));
+        var homomorphicDecryption = HardcodedRsa.Decrypt(aEncoded * bEncoded);
+        var simpleDecryption = HardcodedRsa.Decrypt(aTimesBEncoded);    
+        
+        Assert.Equal(simpleDecryption, homomorphicDecryption);
+        Assert.Equal(a*b, homomorphicDecryption);
+    }
 
-        var signedBallots = voters.Aggregate(
-            encryptedVotes
-                .Select(vote => new SignedBallot {IdBallot = vote.IdBallot, Ballot = vote.Ballot}),
-            (ballots, voter) => _decryptionService.SignVote(voter.Id, ballots)
-        ).ToList();
+    [Fact]
+    public void TestVotingSuccess()
+    {
+        var encryptedVotes = _votes
+            .Select((pair => _encryptionService.EncryptAndSplitBallots(pair.Key, pair.Value)))
+            .ToList();
 
-        foreach (var voter in voters)
+        var ecs = _ecProvider.GetAllEcs();
+
+        foreach (var votes in encryptedVotes)
         {
-            Assert.Equal(_votes[voter.Id], _votesCalculationService.CalculateVote(voter.Id, signedBallots));
+            for (var i = 0; i < votes.Count; i++)
+            {
+                _ecSendingService.SendToEc(ecs[i].Id, votes[i]);
+            }
+        }
+
+        var results = _calculationService.CalculateVotes();
+
+        foreach (var result in results)
+        {
+            Assert.Equal(_votes[result.Item1], result.Item2);
         }
     }
 
     [Fact]
-    public void Test_InvalidBallotCountException()
+    public void TestUserTriesToVoteAgain()
     {
-        var voters = _voterProvider.GetPrivateUserData().ToList();
+        var encryptedVotes = _votes
+            .Select((pair => _encryptionService.EncryptAndSplitBallots(pair.Key, pair.Value)))
+            .ToList();
 
-        var encryptedVotes =
-            from voter in voters
-            let voteBytes = BitConverter.GetBytes(_votes[voter.Id])
-            select _encryptionService.EncryptVote(voter.Id, voteBytes);
+        var ecs = _ecProvider.GetAllEcs();
 
-        var encryptedBallots = encryptedVotes.ToList();
-        encryptedBallots.Add(new EncryptedBallot() {IdBallot = 6, Ballot = new[] {(byte) 1}});
-
-        voters.Reverse();
-        Assert.Throws<InvalidBallotCountException>(() => voters
-            .Aggregate((IEnumerable<EncryptedBallot>)encryptedBallots, (current, voter) =>
-                _decryptionService.DecryptVote(voter.Id, current)
-            )
-        );
-    }
-    
-    [Fact]
-    public void Test_BallotIsNotPresentException()
-    {
-        var voters = _voterProvider.GetPrivateUserData().ToList();
-
-        var encryptedVotes =
-            from voter in voters
-            let voteBytes = BitConverter.GetBytes(_votes[voter.Id])
-            select _encryptionService.EncryptVote(voter.Id, voteBytes);
-
-        var encryptedBallots = encryptedVotes.ToList();
-
-        voters.Reverse();
+        foreach (var votes in encryptedVotes)
+        {
+            for (var i = 0; i < votes.Count; i++)
+            {
+                _ecSendingService.SendToEc(ecs[i].Id, votes[i]);
+            }
+        }
         
-        encryptedBallots[3].Ballot = encryptedBallots[2].Ballot;
-        Assert.Throws<BallotIsNotPresentException>(() => voters
-            .Aggregate((IEnumerable<EncryptedBallot>)encryptedBallots, (current, voter) =>
-                _decryptionService.DecryptVote(voter.Id, current)
-            )
-        );
+        Exception
     }
 
     private void BuildDependencies()
@@ -109,9 +106,12 @@ public class VotingTest {
         services.AddApiDependencies(configuration);
 
         var serviceProvider = services.BuildServiceProvider();
+
+        _ecSendingService = serviceProvider.GetService<IEcSendingService>()!;
         _encryptionService = serviceProvider.GetService<IEncryptionService>()!;
-        _decryptionService = serviceProvider.GetService<IDecryptionService>()!;
-        _votesCalculationService = serviceProvider.GetService<IVotesCalculationService>()!;
+        _calculationService = serviceProvider.GetService<ICalculationService>()!;
         _voterProvider = serviceProvider.GetService<IVoterProvider>()!;
+        _candidateProvider = serviceProvider.GetService<ICandidateProvider>()!;
+        _ecProvider = serviceProvider.GetService<IEcProvider>()!;
     }
 }
