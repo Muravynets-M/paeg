@@ -23,7 +23,7 @@ public class CecCountingService: ICalculationService
             .Select(data => (data.Id, _ecProvider.GetAllUserBallots(data.Id)))
             .Select(ballots => 
                 (ballots.Id, ballots.Item2.Aggregate(1, (rez, ballot) => rez * ballot.Ballot)))
-            .Select(ballots => ballots with { Item2 = HardcodedRsa.Decrypt(ballots.Item2)})
+            .Select(ballots => ballots with { Item2 = ManualRsa.Decrypt(ballots.Item2)})
             .ToList();
     }
 }

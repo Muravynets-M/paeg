@@ -18,7 +18,7 @@ public class EcSendingService : IEcSendingService
 
     public void SendToEc(int idEc, SignedBallot ballot)
     {
-        if (_ecProvider.CheckUserHasNotVoted(idEc, ballot.IdUser))
+        if (_ecProvider.CheckUserHasVoted(idEc, ballot.IdUser))
         {
             throw new BallotAlreadyUsedException();
         }

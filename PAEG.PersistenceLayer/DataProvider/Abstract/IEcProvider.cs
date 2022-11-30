@@ -6,6 +6,6 @@ public interface IEcProvider
 {
     public List<EcData> GetAllEcs();
     public void SaveBallot(int idEc, EncryptedBallot ballot);
-    public bool CheckUserHasNotVoted(int idEc, int idUser);
+    public bool CheckUserHasVoted(int idEc, int idUser);
     public List<EncryptedBallot> GetAllUserBallots(int idUser);
 }

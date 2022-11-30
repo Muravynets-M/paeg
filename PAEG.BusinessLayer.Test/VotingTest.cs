@@ -2,6 +2,7 @@ using System.Security.Cryptography;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using PAEG.BusinessLayer.Encryption;
+using PAEG.BusinessLayer.Exceptions;
 using PAEG.BusinessLayer.Voter;
 using PAEG.DI;
 using PAEG.PersistenceLayer.DataProvider.Abstract;
@@ -38,13 +39,13 @@ public class VotingTest
         var a = 2;
         var b = 16;
 
-        var aEncoded = HardcodedRsa.Encrypt(a);
-        var bEncoded = HardcodedRsa.Encrypt(b);
+        var aEncoded = ManualRsa.Encrypt(a);
+        var bEncoded = ManualRsa.Encrypt(b);
         
-        var aTimesBEncoded = HardcodedRsa.Encrypt(a * b);
+        var aTimesBEncoded = ManualRsa.Encrypt(a * b);
 
-        var homomorphicDecryption = HardcodedRsa.Decrypt(aEncoded * bEncoded);
-        var simpleDecryption = HardcodedRsa.Decrypt(aTimesBEncoded);    
+        var homomorphicDecryption = ManualRsa.Decrypt(aEncoded * bEncoded);
+        var simpleDecryption = ManualRsa.Decrypt(aTimesBEncoded);    
         
         Assert.Equal(simpleDecryption, homomorphicDecryption);
         Assert.Equal(a*b, homomorphicDecryption);
@@ -91,8 +92,8 @@ public class VotingTest
                 _ecSendingService.SendToEc(ecs[i].Id, votes[i]);
             }
         }
-        
-        Exception
+
+        Assert.Throws<BallotAlreadyUsedException>(() => _ecSendingService.SendToEc(ecs[0].Id, encryptedVotes[0][0]));
     }
 
     private void BuildDependencies()

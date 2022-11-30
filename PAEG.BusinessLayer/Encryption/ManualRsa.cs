@@ -1,6 +1,6 @@
 namespace PAEG.BusinessLayer.Encryption;
 
-public class HardcodedRsa
+public class ManualRsa
 {
     private static int N { get; } = 33;
     private static int E { get; } = 7;

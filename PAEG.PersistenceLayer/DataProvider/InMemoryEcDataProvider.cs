@@ -27,9 +27,10 @@ public class InMemoryEcDataProvide : IEcProvider
         ec.Item2.Add(ballot);
     }
 
-    public bool CheckUserHasNotVoted(int idEc, int idUser)
+    public bool CheckUserHasVoted(int idEc, int idUser)
     {
-        return !_ecs.Exists(tuple => tuple.Item1.Id == idEc);
+        return _ecs.FirstOrDefault(tuple => tuple.Item1.Id == idEc)
+            .Item2.Exists(b => b.IdUser == idUser);
     }
 
     public List<EncryptedBallot> GetAllUserBallots(int idUser)

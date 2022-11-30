@@ -39,13 +39,13 @@ public class EncryptionService : IEncryptionService
             {
                 IdUser = idVoter,
                 Sign = sign,
-                Ballot = HardcodedRsa.Encrypt(factor),
+                Ballot = ManualRsa.Encrypt(factor),
             },
             new SignedBallot
             {
                 IdUser = idVoter,
                 Sign = sign,
-                Ballot = HardcodedRsa.Encrypt(candidate/factor)
+                Ballot = ManualRsa.Encrypt(candidate/factor)
             }
         };
 
