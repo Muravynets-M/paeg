@@ -10,6 +10,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PAEG.DI", "PAEG.DI\PAEG.DI.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PAEG.BusinessLayer.Test", "PAEG.BusinessLayer.Test\PAEG.BusinessLayer.Test.csproj", "{327C5DBC-6915-49E1-B11E-6C53BE643346}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PAEG.Encryption", "PAEG.Encryption\PAEG.Encryption.csproj", "{15B9EF6F-6151-4B35-951C-B088C7101A80}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PAEG.VotingCli", "PAEG.VotingCli\PAEG.VotingCli.csproj", "{BEBCAFBD-9562-4513-A6C4-D7D2C8ABE522}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,5 +40,13 @@ Global
 		{327C5DBC-6915-49E1-B11E-6C53BE643346}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{327C5DBC-6915-49E1-B11E-6C53BE643346}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{327C5DBC-6915-49E1-B11E-6C53BE643346}.Release|Any CPU.Build.0 = Release|Any CPU
+		{15B9EF6F-6151-4B35-951C-B088C7101A80}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{15B9EF6F-6151-4B35-951C-B088C7101A80}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{15B9EF6F-6151-4B35-951C-B088C7101A80}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{15B9EF6F-6151-4B35-951C-B088C7101A80}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BEBCAFBD-9562-4513-A6C4-D7D2C8ABE522}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BEBCAFBD-9562-4513-A6C4-D7D2C8ABE522}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BEBCAFBD-9562-4513-A6C4-D7D2C8ABE522}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BEBCAFBD-9562-4513-A6C4-D7D2C8ABE522}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

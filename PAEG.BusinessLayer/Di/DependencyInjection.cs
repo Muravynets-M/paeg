@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using PAEG.BusinessLayer.Voter;
-using PAEG.PersistenceLayer.DataProvider.Abstract;
+using PAEG.BusinessLayer.Decryption;
+using PAEG.BusinessLayer.Encryption;
 
 namespace PAEG.BusinessLayer.Di;
 
@@ -10,9 +10,8 @@ public static class DependencyInjection {
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        services.AddSingleton<IEcSendingService, EcSendingService>();
         services.AddSingleton<IEncryptionService, EncryptionService>();
-        services.AddSingleton<ICalculationService, CecCountingService>();
+        services.AddSingleton<IDecryptionService, DecryptionService>();
 
         return services;
     }

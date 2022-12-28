@@ -10,10 +10,7 @@ public class InMemoryCandidateProvider : ICandidateProvider
 
     public InMemoryCandidateProvider()
     {
-        var r = new Random();
-        _candidates = Enumerable.Range(0, CandidateCount)
-            .Select(i => new CandidateData(r.Next(2, 5) * r.Next(3, 6)))
-            .ToList();
+        _candidates = Enumerable.Range(1, 2).Select(i => new CandidateData(i, Faker.Name.FullName())).ToList();
     }
 
     public List<CandidateData> GetAllCandidates()

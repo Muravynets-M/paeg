@@ -15,8 +15,7 @@ public static class DependencyInjection
         );
         services.AddSingleton<IVoterProvider>(_ => userdataProvider);
         services.AddSingleton<ICandidateProvider, InMemoryCandidateProvider>();
-        services.AddSingleton<IEcProvider, InMemoryEcDataProvide>();
-        services.AddSingleton<ICecProvider, InMemoryCecProvider>();
+        services.AddSingleton<IBallotsProvider, InMemoryBallotsProvider>();
 
         return services;
     }
